@@ -1,0 +1,12 @@
+manga/TitleIndexEntry.class
+manga/MangaHandler.class
+manga/VisualizeMangaTab.class
+manga/RemoveMangaTab.class
+manga/SearchMangaTab.class
+manga/UpdateMangaTab.class
+manga/MangaHandlerGUI.class
+manga/IndexEntry.class
+manga/TabModel.class
+manga/Manga.class
+manga/AddMangaTab.class
+manga/Main.class
