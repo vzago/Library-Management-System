@@ -22,7 +22,7 @@ public class Book {
 
     private final String isbn;
     private final String title;
-    private final List<String> authors;
+    private final String author;
     private final int startYear;
     private final int endYear;
     private final String publisher;
@@ -49,15 +49,15 @@ public class Book {
      * @param acquiredVolumesCounter Acquired volumes counter
      * @param acquiredVolumes Acquired volumes
      */
-    public Book(String isbn, String title, List<String> authors, int startYear, int endYear, String publisher, String genre, String magazine, int editionYear, int totalVolumes, int acquiredVolumesCounter, List<Integer> acquiredVolumes) {
+    public Book(String isbn, String title, String author, int startYear, int endYear,  String genre, String magazine,String publisher, int editionYear, int totalVolumes, int acquiredVolumesCounter, List<Integer> acquiredVolumes) {
         this.isbn = isbn;
         this.title = title;
-        this.authors = authors;
+        this.author = author;
         this.startYear = startYear;
         this.endYear = endYear;
-        this.publisher = publisher;
         this.genre = genre;
         this.magazine = magazine;
+        this.publisher = publisher;
         this.editionYear = editionYear;
         this.totalVolumes = totalVolumes;
         this.acquiredVolumesCounter = acquiredVolumesCounter;
@@ -68,7 +68,7 @@ public class Book {
     public String toString() {
         return "Book : " + title + "\n"
                 + "ISBN : " + isbn + "\n" 
-                + "Authors : " + authors + "\n" 
+                + "Authors : " + author + "\n" 
                 + "Start Year : " + startYear + "\n" 
                 + "End Year : " + endYear + "\n" 
                 + "Publisher : " + publisher + "\n" 
@@ -102,8 +102,8 @@ public class Book {
      * Get the authors of the manga
      * @return Authors
      */
-    public List<String> getAuthors() {
-        return authors;
+    public String getAuthor() {
+        return author;
     }
 
     /**

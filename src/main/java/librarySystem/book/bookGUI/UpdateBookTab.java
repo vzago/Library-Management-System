@@ -25,7 +25,7 @@ public class UpdateBookTab implements TabModel {
     private JPanel updatePanel;
     private JTextField updateTitleSearchField;
     private JTextField updateTitleField;
-    private JTextField updateAuthorsField;
+    private JTextField updateAuthorField;
     private JTextField updateStartYearField;
     private JTextField updateEndYearField;
     private JTextField updateGenreField;
@@ -70,7 +70,7 @@ public class UpdateBookTab implements TabModel {
         updatePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         updateTitleSearchField = new JTextField();
         updateTitleField = new JTextField();
-        updateAuthorsField = new JTextField();
+        updateAuthorField = new JTextField();
         updateStartYearField = new JTextField();
         updateEndYearField = new JTextField();
         updateGenreField = new JTextField();
@@ -92,8 +92,8 @@ public class UpdateBookTab implements TabModel {
         updatePanel.add(new JLabel());
         updatePanel.add(new JLabel("Title:"));
         updatePanel.add(updateTitleField);
-        updatePanel.add(new JLabel("Authors (comma separated):"));
-        updatePanel.add(updateAuthorsField);
+        updatePanel.add(new JLabel("Author:"));
+        updatePanel.add(updateAuthorField);
         updatePanel.add(new JLabel("Start Year:"));
         updatePanel.add(updateStartYearField);
         updatePanel.add(new JLabel("End Year:"));
@@ -125,16 +125,15 @@ public class UpdateBookTab implements TabModel {
      */
     public void actionPerformed(ActionEvent e) {
         try {
-            List<String> authors = Arrays.asList(updateAuthorsField.getText().split(","));
             List<Integer> acquiredVolumes = Arrays.stream(updateAcquiredVolumesField.getText().split(",")).map(Integer::parseInt).toList();
-            List<String> isbns = handler.getIsbnsByTitle(updateTitleSearchField.getText());
+            List<String> isbns = handler.titleIndexManager.getIsbnsByKey(updateTitleSearchField.getText());
             if(isbns.size() == 0) {
                 throw new IOException("Book not found.");
             }
             Book updatedBook = new Book(
                     isbns.get(0),
                     updateTitleField.getText(),
-                    authors,
+                    updateAuthorField.getText(),
                     Integer.parseInt(updateStartYearField.getText()),
                     Integer.parseInt(updateEndYearField.getText()),
                     updateGenreField.getText(),

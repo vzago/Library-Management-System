@@ -15,10 +15,15 @@ public class BookHandler {
 
     private static final String DATA_FILE = "book.dat";
     private static final String INDEX_FILE = "index.dat";
-    private static final String TITLE_INDEX_FILE = "title_index.dat";
     private static final String TEMP_FILE = "temp.dat";
+    private static final String TITLE_INDEX_FILE = "title_index.dat";
+    private static final String AUTHOR_INDEX_FILE = "author_index.dat";
+    private static final String GENRE_INDEX_FILE = "genre_index.dat";
     private static final int RECORD_SIZE = 2048;
     private final List<Long> deletedRecordsSpaces;
+    private SecondayIndexManager authorIndexManager;
+    private SecondayIndexManager genreIndexManager;
+    public SecondayIndexManager titleIndexManager;
 
     private static final int NOT_FOUND = -1;
 
@@ -28,6 +33,9 @@ public class BookHandler {
      */
     public BookHandler() {
         deletedRecordsSpaces = new ArrayList<>();
+        titleIndexManager = new SecondayIndexManager(TITLE_INDEX_FILE);
+        authorIndexManager = new SecondayIndexManager(AUTHOR_INDEX_FILE);
+        genreIndexManager = new SecondayIndexManager(GENRE_INDEX_FILE);
         loadDeletedRecordsSpaces();
     }
 
@@ -85,7 +93,9 @@ public class BookHandler {
             dataFile.seek(filePointer);
             writeBook(dataFile, book);
             addIndex(book.getIsbn(), filePointer);
-            addTitleIndex(book.getTitle(), book.getIsbn());
+            titleIndexManager.addSecondaryIndex(book.getTitle(), book.getIsbn());
+            authorIndexManager.addSecondaryIndex(book.getAuthor(), book.getIsbn());
+            genreIndexManager.addSecondaryIndex(book.getGenre(), book.getIsbn());
         }catch(FileNotFoundException e){
             System.out.println("FIle not found, creating new file...");
         }
@@ -134,8 +144,8 @@ public class BookHandler {
             // Check if the title has changed and update the title index
             Book tempBook = getBook(isbn);
             if(!tempBook.getTitle().equals(updatedBook.getTitle())){
-                removeTitleIndex(isbn);
-                addTitleIndex(updatedBook.getTitle(), isbn);
+                titleIndexManager.removeSecondaryIndex(isbn);
+                titleIndexManager.addSecondaryIndex(updatedBook.getTitle(), isbn);
                 }
             writeBook(dataFile, updatedBook);
         }catch(FileNotFoundException e){
@@ -165,7 +175,9 @@ public class BookHandler {
             deletedRecordsSpaces.add(filePointer);
         }
         removeIndex(isbn);
-        removeTitleIndex(isbn);
+        titleIndexManager.removeSecondaryIndex(isbn);
+        authorIndexManager.removeSecondaryIndex(isbn);
+        genreIndexManager.removeSecondaryIndex(isbn);
     }
 
 
@@ -179,18 +191,68 @@ public class BookHandler {
      */
     public List<Book> searchBooksByTitle(String title) throws IOException {
 
-        List<String> isbns = getIsbnsByTitle(title);
-        List<Book> mangases = new ArrayList<>();
+        List<String> isbns = titleIndexManager.getIsbnsByKey(title);
+        List<Book> books = new ArrayList<>();
         Book book;
 
         for (String isbn : isbns) {
             book = getBook(isbn);
             if (book != null) {
-                mangases.add(book);
+                books.add(book);
             }
         }
-        return mangases;
+        return books;
     }
+
+    /**
+     * Searches for mangas by author.
+     * The method searches the author index file for all authors that match the specified author.
+     * For each author found, the method retrieves the ISBNs from the author index file and retrieves the mangas from the data file.
+     * @param author The author to search for.
+     * @return A list of book objects with authors that match the specified author.
+     * @throws IOException If an I/O error occurs.
+     */
+    public List<Book> searchBooksByAuthor(String author) throws IOException {
+
+        List<String> isbns = authorIndexManager.getIsbnsByKey(author);
+        List<Book> books = new ArrayList<>();
+        Book book;
+
+        for (String isbn : isbns) {
+            book = getBook(isbn);
+            if (book != null) {
+                books.add(book);
+            }
+        }
+        return books;
+    }
+
+    /**
+     * Searches for mangas by genre.
+     * The method searches the genre index file for all genres that match the specified genre.
+     * For each genre found, the method retrieves the ISBNs from the genre index file and retrieves the mangas from the data file.
+     * @param genre The genre to search for.
+     * @return A list of book objects with genres that match the specified genre.
+     * @throws IOException If an I/O error occurs.
+     */
+    public List<Book> searchBooksByGenre(String genre) throws IOException {
+
+        List<String> isbns = genreIndexManager.getIsbnsByKey(genre);
+        List<Book> books = new ArrayList<>();
+        Book book;
+
+        for (String isbn : isbns) {
+            book = getBook(isbn);
+            if (book != null) {
+                books.add(book);
+            }
+        }
+        return books;
+    }
+
+
+
+
 
     /**
      * Searches for a book by its ISBN.
@@ -223,12 +285,7 @@ public class BookHandler {
         long start_Pointer = data_file.getFilePointer();
         data_file.writeUTF(book.getIsbn());
         data_file.writeUTF(book.getTitle());
-        data_file.writeInt(book.getAuthors().size());
-
-        for (String author : book.getAuthors()) {
-            data_file.writeUTF(author);
-        }
-
+        data_file.writeUTF(book.getAuthor());
         data_file.writeInt(book.getStartYear());
         data_file.writeInt(book.getEndYear());
         data_file.writeUTF(book.getGenre());
@@ -262,13 +319,7 @@ public class BookHandler {
 
         String isbn = file.readUTF();
         String title = file.readUTF();
-        int authorsCount = file.readInt();
-
-        List<String> authors = new ArrayList<>();
-        for (int i = 0; i < authorsCount; i++) {
-            authors.add(file.readUTF());
-        }
-
+        String author = file.readUTF();
         int startYear = file.readInt();
         int endYear = file.readInt();
         String genre = file.readUTF();
@@ -284,7 +335,7 @@ public class BookHandler {
         }
 
         file.seek(file.getFilePointer() + (RECORD_SIZE - (file.getFilePointer() % RECORD_SIZE)));
-        return new Book(isbn, title, authors, startYear, endYear, genre, magazine, publisher, editionYear, totalVolumes, acquiredVolumesCount, acquiredVolumes);
+        return new Book(isbn, title, author, startYear, endYear, genre, magazine, publisher, editionYear, totalVolumes, acquiredVolumesCount, acquiredVolumes);
     }
 
     /**
@@ -405,148 +456,11 @@ public class BookHandler {
         tempFile.renameTo(new File(INDEX_FILE));
     }
 
-    /**
-     * Adds a title index entry to the title index file.
-     * The method reads the current title index entries from the title index file and adds the new title index entry.
-     * The method sorts the title index entries by title and writes them back to the title index file.
-     * @param title The title of the book to add to the title index file.
-     * @param isbn The ISBN of the book to add to the title index file.
-     * @throws IOException If an I/O error occurs.
-     */
-    private void addTitleIndex(String title, String isbn) throws IOException {
-        String temp_currentTitle;
-        String temp_currentIsbn;
-        List<TitleIndexEntry> titleIndexEntries = new ArrayList<>();
-
-        // Read all current title indexes
-        try (RandomAccessFile titleIndexFile = new RandomAccessFile(TITLE_INDEX_FILE, "r")) {
-
-            while (titleIndexFile.getFilePointer() < titleIndexFile.length()) {
-                temp_currentTitle = titleIndexFile.readUTF();
-                temp_currentIsbn = titleIndexFile.readUTF();
-                titleIndexEntries.add(new TitleIndexEntry(temp_currentTitle, temp_currentIsbn));
-            }
-        }catch(FileNotFoundException e){
-            System.out.println("File not found in addTitleIndex method, creating new file...");
-        }
-
-        // Add the new title index
-        titleIndexEntries.add(new TitleIndexEntry(title, isbn));
-
-        // Order the title indexes by title
-        titleIndexEntries.sort(Comparator.comparing(TitleIndexEntry::getTitle));
-
-        // Write the title indexes back to the file
-        try (RandomAccessFile titleIndexFile = new RandomAccessFile(TITLE_INDEX_FILE, "rw")) {
-            // Clear the file
-            titleIndexFile.setLength(0);
-            for (TitleIndexEntry entry : titleIndexEntries) {
-                titleIndexFile.writeUTF(entry.getTitle());
-                titleIndexFile.writeUTF(entry.getIsbn());
-            }
-        }
-    }
-
-
-    /**
-     * Retrieves the ISBNs of mangas with the specified title.
-     * The method reads the title index file and uses binary search to find the title index entries with the specified title.
-     * @param title The title of the mangas to find.
-     * @return A list of ISBNs of mangas with the specified title.
-     * @throws IOException If an I/O error occurs.
-     */
-    public List<String> getIsbnsByTitle(String title) throws IOException {
-
-        List<TitleIndexEntry> titleIndexEntries = new ArrayList<>();
-        String temp_currentTitle;
-        String temp_isbn;
-
-        // Read all current title indexes
-        try (RandomAccessFile titleIndexFile = new RandomAccessFile(TITLE_INDEX_FILE, "r")) {
-            while (titleIndexFile.getFilePointer() < titleIndexFile.length()) {
-                temp_currentTitle = titleIndexFile.readUTF();
-                temp_isbn = titleIndexFile.readUTF();
-                titleIndexEntries.add(new TitleIndexEntry(temp_currentTitle, temp_isbn));
-            }
-        }
-
-        // Use binary search to find the title
-        List<String> foundIsbns = new ArrayList<>();
-        TitleIndexEntry midEntry;
-        int mid;
-        int cmp;
-        int index;
-        int left = 0;
-        int right = titleIndexEntries.size() - 1;
-
-        while (left <= right) {
-            mid = (left + right) / 2;
-            midEntry = titleIndexEntries.get(mid);
-            cmp = midEntry.getTitle().compareTo(title);
-
-            if (cmp < 0) {
-                left = mid + 1;
-            } else if (cmp > 0) {
-                right = mid - 1;
-            } else {
-                // Found one title, now we need to find all titles with the same name
-                // Search to the left first
-                index = mid;
-                while (index >= 0 && titleIndexEntries.get(index).getTitle().equals(title)) {
-                    foundIsbns.add(titleIndexEntries.get(index).getIsbn());
-                    index--;
-                }
-                // Now search to the right
-                index = mid + 1;
-                while (index < titleIndexEntries.size() && titleIndexEntries.get(index).getTitle().equals(title)) {
-                    foundIsbns.add(titleIndexEntries.get(index).getIsbn());
-                    index++;
-                }
-                break;
-            }
-        }
-        return foundIsbns;
-    }
-
-    /**
-     * Removes a title index entry from the title index file.
-     * The method reads the current title index entries from the title index file and writes them back to a temporary file.
-     * The method skips the title index entry with the specified ISBN and renames the temporary file to the title index file.
-     * @param isbn_rem The ISBN of the book to remove from the title index file.
-     * @throws IOException If an I/O error occurs.
-     */
-    private void removeTitleIndex(String isbn_rem) throws IOException {
-
-        File tempFile = new File(TEMP_FILE);
-        String temp_currentTitle;    
-        String temp_currentIsbn;
-
-
-        try (RandomAccessFile titleIndexFile = new RandomAccessFile(TITLE_INDEX_FILE, "rw");
-            RandomAccessFile tempTitleIndexFile = new RandomAccessFile(tempFile, "rw")) {
-            while (titleIndexFile.getFilePointer() < titleIndexFile.length()) {
-                temp_currentTitle = titleIndexFile.readUTF();
-                temp_currentIsbn = titleIndexFile.readUTF();
-                if (!temp_currentIsbn.equals(isbn_rem)) {
-                    tempTitleIndexFile.writeUTF(temp_currentTitle);
-                    tempTitleIndexFile.writeUTF(temp_currentIsbn);
-                }
-            }
-        }
-        tempFile.renameTo(new File(TITLE_INDEX_FILE));
-    }
-
-    /**
-     * Retrieves all the titles of the mangas.
-     * The method reads the title index file and retrieves all the titles.
-     * @return A list of all the titles of the mangas.
-     * @throws IOException If an I/O error occurs.
-     */
     public List<String> getAllMangaTitles() throws IOException {
         List<String> titles = new ArrayList<>();
         String title;
 
-        try (RandomAccessFile indexFile = new RandomAccessFile(TITLE_INDEX_FILE, "rw")) {
+        try (RandomAccessFile indexFile = new RandomAccessFile(TITLE_INDEX_FILE, "r")) {
 
             indexFile.seek(0);
             while (indexFile.getFilePointer() < indexFile.length()) {

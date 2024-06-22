@@ -90,7 +90,7 @@ public class AddBookTab implements TabModel {
         addPanel.add(addIsbnField);
         addPanel.add(new JLabel("Title:"));
         addPanel.add(addTitleField);
-        addPanel.add(new JLabel("Authors (comma separated):"));
+        addPanel.add(new JLabel("Author:"));
         addPanel.add(addAuthorsField);
         addPanel.add(new JLabel("Start Year:"));
         addPanel.add(addStartYearField);
@@ -125,13 +125,12 @@ public class AddBookTab implements TabModel {
     public void actionPerformed(ActionEvent e) {
         try {
             
-            List<String> authors = Arrays.asList(addAuthorsField.getText().split(","));
             List<Integer> acquiredVolumes = Arrays.stream(addAcquiredVolumesField.getText().split(",")).map(Integer::parseInt).toList();
 
             Book book = new Book(
                     addIsbnField.getText(),
                     addTitleField.getText(),
-                    authors,
+                    addAuthorsField.getText(),
                     Integer.parseInt(addStartYearField.getText()),
                     Integer.parseInt(addEndYearField.getText()),
                     addGenreField.getText(),

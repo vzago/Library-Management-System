@@ -3,20 +3,20 @@ package librarySystem.book;
 /**
  * TitleIndexEntry class
  * It represents a title index entry object with its attributes
- * - title: Title
+ * - key: Title, author, or genre
  * - isbn: International Standard Book Number
  */
-public class TitleIndexEntry {
-    private final String title;
+public class KeyIndexEntry {
+    private final String key;
     private final String isbn;
 
     /**
      * Constructor
-     * @param title Title
+     * @param key key
      * @param isbn ISBN
      */
-    public TitleIndexEntry(String title, String isbn) {
-        this.title = title;
+    public KeyIndexEntry(String key, String isbn) {
+        this.key = key;
         this.isbn = isbn;
     }
 
@@ -24,8 +24,8 @@ public class TitleIndexEntry {
      * Get the title
      * @return Title
      */
-    public String getTitle() {
-        return title;
+    public String getKey() {
+        return key;
     }
 
     /**
