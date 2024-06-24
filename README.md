@@ -1,20 +1,14 @@
-# Manga Handler
+# Library-Management-System 
 
-Manga Handler é uma aplicação Java para gerenciar coleções de mangás. Este projeto utiliza Maven para gerenciar dependências e facilitar o processo de build.
-
-## Vídeo de Explicação
-
-Confira este vídeo no YouTube para uma explicação detalhada do código e de como utilizar o Manga Handler:
-
-[![Assista no YouTube](https://img.youtube.com/vi/VdrfkYiryJ8/maxresdefault.jpg)](https://www.youtube.com/watch?v=VdrfkYiryJ8)
+Library Management System é uma aplicação Java para gerenciar uma biblioteca. Este projeto utiliza Maven para gerenciar dependências e facilitar o processo de build.
 
 ## Funcionalidades
 
-- Adicionar novos mangás à coleção
-- Listar todos os mangás na coleção
-- Buscar mangás por título ou autor
-- Atualizar mangás por titulo
-- Remover mangás da coleção
+- Adicionar novos livros à biblioteca (Bibliotecário)
+- Listar todos os livros da biblioteca  (Aluno/Bibliotecário)
+- Buscar livros por título ou autor (Aluno/Bibliotecário)
+- Atualizar livros por titulo (Bibliotecário)
+- Remover livros da biblioteca  (Bibliotecário)
 
 ## Pré-requisitos
 
@@ -26,8 +20,8 @@ Confira este vídeo no YouTube para uma explicação detalhada do código e de c
 1. Clone o repositório:
 
     ```bash
-    git clone https://github.com/moreira-arthur/mangahandler
-    cd mangahandler
+    git clone https://github.com/moreira-arthur/library-management-system
+    cd library-management-system
     ```
 
 2. Compile o projeto utilizando Maven:
