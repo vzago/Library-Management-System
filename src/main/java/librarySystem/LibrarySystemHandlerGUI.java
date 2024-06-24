@@ -1,82 +1,88 @@
 package librarySystem;
 
-import librarySystem.book.BookHandler;
-import librarySystem.book.bookGUI.*;
-import librarySystem.patron.PatronHandler;
-import librarySystem.patron.patronGUI.*;
+import librarySystem.login.Login;
+import librarySystem.login.LoginHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * GUI for the MangaHandler
  * It creates a JFrame with a JTabbedPane
  * The JTabbedPane has tabs for adding, updating, removing, searching and viewing book
  */
-public class LibrarySystemHandlerGUI {
-    private final BookHandler bookManager;
-    private final PatronHandler patronManager;
+public class LibrarySystemHandlerGUI implements ActionListener {
 
-    private final JTabbedPane tabbedPane;
-    private final JFrame frame;
-    
+    private JFrame frame;
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
+    private LoginHandler loginHandler;
+
     /**
      * Constructor for the MangaHandlerGUI
      * It creates a JFrame with a JTabbedPane
      * The JTabbedPane has tabs for adding, updating, removing, searching and viewing book
      */
     public LibrarySystemHandlerGUI() {
-        patronManager = new PatronHandler();
-        bookManager = new BookHandler();
-        frame = new JFrame("Book Manager");
+        loginHandler = new LoginHandler();
+        initialize();
+    }
+
+    private void initialize() {
+        frame = new JFrame("Login System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(900, 300);
 
-        Font font = new Font("Arial", Font.BOLD, 16);
-        Color backgroundColor = new Color(230, 230, 250); // Light lavender
-        Color foregroundColor = new Color(25, 25, 112); // Midnight blue
+        // Define a GridLayout with 3 rows and 2 columns
+        frame.setLayout(new GridLayout(4, 2, 10, 10));
+        JLabel greetingLabel = new JLabel("Welcome to the Library Management System !!!");
+        JLabel titleLabel = new JLabel("Please enter your credentials to login:");
+        greetingLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameField = new JTextField();
+        
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordField = new JPasswordField();
+        
+        loginButton = new JButton("Login");
+        loginButton.addActionListener(this);
+        
+        // Add components to the frame
+        frame.add(greetingLabel);
+        frame.add(titleLabel);
+        frame.add(usernameLabel);
+        frame.add(usernameField);
+        frame.add(passwordLabel);
+        frame.add(passwordField);
+        frame.add(new JLabel()); // empty label to adjust the layout
+        frame.add(loginButton);
 
-        // Modify the look and feel of the GUI
-        UIManager.put("Label.font", font);
-        UIManager.put("TextField.font", font);
-        UIManager.put("Button.font", font);
-        UIManager.put("TextArea.font", font);
-        UIManager.put("TabbedPane.font", font);
-        UIManager.put("Label.foreground", foregroundColor);
-        UIManager.put("TextField.foreground", foregroundColor);
-        UIManager.put("Button.foreground", foregroundColor);
-        UIManager.put("TextArea.foreground", foregroundColor);
-        UIManager.put("TabbedPane.foreground", foregroundColor);
-        UIManager.put("Panel.background", backgroundColor);
-        UIManager.put("TextField.background", Color.WHITE);
-        UIManager.put("TextArea.background", Color.WHITE);
-        UIManager.put("Button.background", Color.LIGHT_GRAY);
-
-        tabbedPane = new JTabbedPane();
-
-        // Tab for adding book
-        new AddBookTab(frame, bookManager, tabbedPane);
-        // Tab for updating book
-        new UpdateBookTab(frame, bookManager, tabbedPane);
-        // Tab for removing book
-        new RemoveBookTab(frame, bookManager, tabbedPane);
-        // Tab for searching book
-        new SearchBookTab(frame, bookManager, tabbedPane);
-        // Tab for viewing book
-        new VisualizeBookTab(frame, bookManager, tabbedPane);
-        // Tab for adding patron
-        new AddPatronTab(frame,patronManager,tabbedPane);
-        //tab for searching patron
-        new SearchPatronTab(frame,patronManager,tabbedPane);
-        //tab for removing patron
-        new RemovePatronTab(frame,patronManager,tabbedPane);
-        //tab for updating patron
-        new UpdatePatronTab(frame,patronManager,tabbedPane);
-        //Tab for viewing patron
-        new VisualizePatronTab(frame,patronManager,tabbedPane);
-
-        frame.getContentPane().add(tabbedPane);
         frame.setVisible(true);
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+        Login login = new Login(username, password);
+
+        if (loginHandler.isAdminLogin(login)) {
+            JOptionPane.showMessageDialog(frame, "Admin login successful!");
+            frame.dispose();
+            new AdminFrame();
+            return;
+        } else if (loginHandler.isValidLogin(login)) {
+            JOptionPane.showMessageDialog(frame, "Login successful!");
+            frame.dispose();
+            new LibraryFrame();
+        } else {
+            JOptionPane.showMessageDialog(frame, "Invalid username or password.");
+        }
     }
 
 }
+
