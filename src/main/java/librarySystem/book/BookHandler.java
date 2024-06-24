@@ -21,9 +21,9 @@ public class BookHandler {
     private static final String GENRE_INDEX_FILE = "genre_index.dat";
     private static final int RECORD_SIZE = 2048;
     private final List<Long> deletedRecordsSpaces;
-    private SecondayIndexManager authorIndexManager;
-    private SecondayIndexManager genreIndexManager;
-    public SecondayIndexManager titleIndexManager;
+    private BookSecondaryIndexManager authorIndexManager;
+    private BookSecondaryIndexManager genreIndexManager;
+    public BookSecondaryIndexManager titleIndexManager;
 
     private static final int NOT_FOUND = -1;
 
@@ -33,9 +33,9 @@ public class BookHandler {
      */
     public BookHandler() {
         deletedRecordsSpaces = new ArrayList<>();
-        titleIndexManager = new SecondayIndexManager(TITLE_INDEX_FILE);
-        authorIndexManager = new SecondayIndexManager(AUTHOR_INDEX_FILE);
-        genreIndexManager = new SecondayIndexManager(GENRE_INDEX_FILE);
+        titleIndexManager = new BookSecondaryIndexManager(TITLE_INDEX_FILE);
+        authorIndexManager = new BookSecondaryIndexManager(AUTHOR_INDEX_FILE);
+        genreIndexManager = new BookSecondaryIndexManager(GENRE_INDEX_FILE);
         loadDeletedRecordsSpaces();
     }
 
@@ -348,7 +348,7 @@ public class BookHandler {
      */
     private void addIndex(String isbn, long filePointer) throws IOException {
 
-        List<IndexEntry> indexEntries = new ArrayList<>();
+        List<BookIndexEntry> indexEntries = new ArrayList<>();
         String currentIsbn;
         long currentPointer;
 
@@ -357,7 +357,7 @@ public class BookHandler {
             while (indexFile.getFilePointer() < indexFile.length()) {
                 currentIsbn = indexFile.readUTF();
                 currentPointer = indexFile.readLong();
-                indexEntries.add(new IndexEntry(currentIsbn, currentPointer));
+                indexEntries.add(new BookIndexEntry(currentIsbn, currentPointer));
             }
         }catch(FileNotFoundException e){
             System.out.println("File not found, creating new file...");
@@ -367,13 +367,13 @@ public class BookHandler {
             System.out.println("Error in addIndex method");
         }
 
-        indexEntries.add(new IndexEntry(isbn, filePointer));
+        indexEntries.add(new BookIndexEntry(isbn, filePointer));
 
-        indexEntries.sort(Comparator.comparing(IndexEntry::getIsbn));
+        indexEntries.sort(Comparator.comparing(BookIndexEntry::getIsbn));
 
         try (RandomAccessFile indexFile = new RandomAccessFile(INDEX_FILE, "rw")) {
             indexFile.setLength(0); //Clear the file
-            for (IndexEntry entry : indexEntries) {
+            for (BookIndexEntry entry : indexEntries) {
                 indexFile.writeUTF(entry.getIsbn());
                 indexFile.writeLong(entry.getFilePointer());
             }
@@ -389,7 +389,7 @@ public class BookHandler {
      */
     private long getPositionFromIndexFile(String isbn) throws IOException {
 
-        List<IndexEntry> indexEntries = new ArrayList<>();
+        List<BookIndexEntry> indexEntries = new ArrayList<>();
         String currentIsbn;
         long filePointer;
 
@@ -398,14 +398,14 @@ public class BookHandler {
             while (indexFile.getFilePointer() < indexFile.length()) {
                 currentIsbn = indexFile.readUTF();
                 filePointer = indexFile.readLong();
-                indexEntries.add(new IndexEntry(currentIsbn, filePointer));
+                indexEntries.add(new BookIndexEntry(currentIsbn, filePointer));
             }
         }catch(FileNotFoundException e){
             System.out.println("File not found in getPositionFromIndexFile method");
         }
 
         // Use binary search to find the index
-        IndexEntry midEntry;
+        BookIndexEntry midEntry;
         int mid;
         int cmp;
         int left = 0;

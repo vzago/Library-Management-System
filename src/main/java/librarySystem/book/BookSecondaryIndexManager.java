@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class SecondayIndexManager {
+public class BookSecondaryIndexManager {
 
     private static final String TEMP_FILE = "temp.dat";
     private String filename;
 
-    public SecondayIndexManager(String filename){
+    public BookSecondaryIndexManager(String filename){
         this.filename = filename;
     }
 
@@ -29,7 +29,7 @@ public class SecondayIndexManager {
     public void addSecondaryIndex(String key, String isbn) throws IOException {
         String temp_currentTitle;
         String temp_currentIsbn;
-        List<KeyIndexEntry> keyIndexEntry = new ArrayList<>();
+        List<BookKeyIndexEntry> bookKeyIndexEntry = new ArrayList<>();
 
         // Read all current title indexes
         try (RandomAccessFile secondaryIndexFile = new RandomAccessFile(filename, "r")) {
@@ -37,23 +37,23 @@ public class SecondayIndexManager {
             while (secondaryIndexFile.getFilePointer() < secondaryIndexFile.length()) {
                 temp_currentTitle = secondaryIndexFile.readUTF();
                 temp_currentIsbn = secondaryIndexFile.readUTF();
-                keyIndexEntry.add(new KeyIndexEntry(temp_currentTitle, temp_currentIsbn));
+                bookKeyIndexEntry.add(new BookKeyIndexEntry(temp_currentTitle, temp_currentIsbn));
             }
         }catch(FileNotFoundException e){
             System.out.println("File not found in addTitleIndex method, creating new file...");
         }
 
         // Add the new title index
-        keyIndexEntry.add(new KeyIndexEntry(key, isbn));
+        bookKeyIndexEntry.add(new BookKeyIndexEntry(key, isbn));
 
         // Order the title indexes by title
-        keyIndexEntry.sort(Comparator.comparing(KeyIndexEntry::getKey));
+        bookKeyIndexEntry.sort(Comparator.comparing(BookKeyIndexEntry::getKey));
 
         // Write the title indexes back to the file
         try (RandomAccessFile secondaryIndexFile = new RandomAccessFile(filename, "rw")) {
             // Clear the file
             secondaryIndexFile.setLength(0);
-            for (KeyIndexEntry entry : keyIndexEntry) {
+            for (BookKeyIndexEntry entry : bookKeyIndexEntry) {
                 secondaryIndexFile.writeUTF(entry.getKey());
                 secondaryIndexFile.writeUTF(entry.getIsbn());
             }
@@ -70,7 +70,7 @@ public class SecondayIndexManager {
      */
     public List<String> getIsbnsByKey(String key) throws IOException {
 
-        List<KeyIndexEntry> keyIndexEntry = new ArrayList<>();
+        List<BookKeyIndexEntry> bookKeyIndexEntry = new ArrayList<>();
         String temp_currentTitle;
         String temp_isbn;
 
@@ -79,22 +79,22 @@ public class SecondayIndexManager {
             while (secondaryIndexFile.getFilePointer() < secondaryIndexFile.length()) {
                 temp_currentTitle = secondaryIndexFile.readUTF();
                 temp_isbn = secondaryIndexFile.readUTF();
-                keyIndexEntry.add(new KeyIndexEntry(temp_currentTitle, temp_isbn));
+                bookKeyIndexEntry.add(new BookKeyIndexEntry(temp_currentTitle, temp_isbn));
             }
         }
 
         // Use binary search to find the title
         List<String> foundIsbns = new ArrayList<>();
-        KeyIndexEntry midEntry;
+        BookKeyIndexEntry midEntry;
         int mid;
         int cmp;
         int index;
         int left = 0;
-        int right = keyIndexEntry.size() - 1;
+        int right = bookKeyIndexEntry.size() - 1;
 
         while (left <= right) {
             mid = (left + right) / 2;
-            midEntry = keyIndexEntry.get(mid);
+            midEntry = bookKeyIndexEntry.get(mid);
             cmp = midEntry.getKey().compareTo(key);
 
             if (cmp < 0) {
@@ -105,14 +105,14 @@ public class SecondayIndexManager {
                 // Found one title, now we need to find all titles with the same name
                 // Search to the left first
                 index = mid;
-                while (index >= 0 && keyIndexEntry.get(index).getKey().equals(key)) {
-                    foundIsbns.add(keyIndexEntry.get(index).getIsbn());
+                while (index >= 0 && bookKeyIndexEntry.get(index).getKey().equals(key)) {
+                    foundIsbns.add(bookKeyIndexEntry.get(index).getIsbn());
                     index--;
                 }
                 // Now search to the right
                 index = mid + 1;
-                while (index < keyIndexEntry.size() && keyIndexEntry.get(index).getKey().equals(key)) {
-                    foundIsbns.add(keyIndexEntry.get(index).getIsbn());
+                while (index < bookKeyIndexEntry.size() && bookKeyIndexEntry.get(index).getKey().equals(key)) {
+                    foundIsbns.add(bookKeyIndexEntry.get(index).getIsbn());
                     index++;
                 }
                 break;

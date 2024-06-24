@@ -105,7 +105,7 @@ public class UpdatePatronTab implements TabModel {
      */
     public void actionPerformed(ActionEvent e) {
         try {
-            List<String> cpfs = handler.getCpfsByLastName(updateLastNameSearchField.getText());
+            List<String> cpfs = handler.lastNameIndexManager.getCpfsByKey(updateLastNameSearchField.getText());
             if(cpfs.size() == 0) {
                 throw new IOException("Patron not found.");
             }

@@ -1,6 +1,7 @@
 package librarySystem.patron.patronGUI;
 
 import librarySystem.TabModel;
+import librarySystem.book.Book;
 import librarySystem.patron.Patron;
 import librarySystem.patron.PatronHandler;
 import librarySystem.patron.PatronHandler;
@@ -22,10 +23,13 @@ public class SearchPatronTab implements TabModel {
     private final JTabbedPane tabbedPane;
 
     private JPanel searchPanel;
+    private JTextField searchNameField;
     private JTextField searchLastNameField;
     private JTextField searchCpfField;
     private JButton searchByLastNameButton;
     private JButton searchByCpfButton;
+
+    private JButton searchByNameButton;
     private JTextArea searchResultsArea;
 
     private JScrollPane scrollPane;
@@ -63,16 +67,20 @@ public class SearchPatronTab implements TabModel {
     public void initComponents() {
         searchPanel = new JPanel(new BorderLayout());
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+        searchNameField = new JTextField();
         searchLastNameField = new JTextField();
         searchCpfField = new JTextField();
+
         searchByLastNameButton = new JButton("Search by Last Name");
         searchByCpfButton = new JButton("Search by CPF");
+        searchByNameButton = new JButton("Search by Name");
+
         searchResultsArea = new JTextArea();
         searchResultsArea.setEditable(false);
+
         scrollPane = new JScrollPane(searchResultsArea);
-        searchInputPanel = new JPanel(new GridLayout(2, 2));
-        searchButtonPanel = new JPanel(new GridLayout(1, 2));
+        searchInputPanel = new JPanel(new GridLayout(3, 3));
+        searchButtonPanel = new JPanel(new GridLayout(1, 3));
     }
 
     /**
@@ -83,15 +91,21 @@ public class SearchPatronTab implements TabModel {
         searchInputPanel.add(searchLastNameField);
         searchInputPanel.add(new JLabel("Search by CPF:"));
         searchInputPanel.add(searchCpfField);
+        searchInputPanel.add(new JLabel("Search by Name:"));
+        searchInputPanel.add(searchNameField);
+
+
         searchPanel.add(searchInputPanel, BorderLayout.NORTH);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         searchButtonPanel.add(searchByLastNameButton);
         searchButtonPanel.add(searchByCpfButton);
+        searchButtonPanel.add(searchByNameButton);
         searchPanel.add(searchButtonPanel, BorderLayout.SOUTH);
 
         searchByLastNameButton.addActionListener(this);
         searchByCpfButton.addActionListener(this);
+        searchByNameButton.addActionListener(this);
         tabbedPane.addTab("Search Patron", searchPanel);
     }
 
@@ -119,6 +133,20 @@ public class SearchPatronTab implements TabModel {
         } else if(e.getSource() == searchByCpfButton){
             try {
                 patrons = handler.searchPatronByCpf(searchCpfField.getText());
+                searchResultsArea.setText("");
+                for (Patron patron : patrons) {
+                    searchResultsArea.append(patron.toString() + "\n");
+                }
+                if (patrons.isEmpty()) {
+                    searchResultsArea.append("No patrons found.");
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Error searching patron.");
+            }
+        }else if(e.getSource() == searchByNameButton){
+            try {
+                patrons = handler.searchPatronByName(searchNameField.getText());
                 searchResultsArea.setText("");
                 for (Patron patron : patrons) {
                     searchResultsArea.append(patron.toString() + "\n");

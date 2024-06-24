@@ -2,30 +2,30 @@ package librarySystem.patron;
 
 /**
  * LastNameIndexEntry class
- * It represents a lastName index entry object with its attributes
- * - lastName: Last Name
+ * It represents a key index entry object with its attributes
+ * - key: Last Name
  * - cpf: Identification (Cadastro de Pessoa Fisica)
  */
-public class LastNameIndexEntry {
-    private final String lastName;
+public class PatronKeyIndexEntry {
+    private final String key;
     private final String cpf;
 
     /**
      * Constructor
-     * @param lastName Last Name
+     * @param key Last Name
      * @param cpf CPF
      */
-    public LastNameIndexEntry(String lastName, String cpf) {
-        this.lastName = lastName;
+    public PatronKeyIndexEntry(String key, String cpf) {
+        this.key = key;
         this.cpf = cpf;
     }
 
     /**
-     * Get the lastName
+     * Get the key
      * @return Last Name
      */
-    public String getLastName() {
-        return lastName;
+    public String getKey() {
+        return key;
     }
 
     /**

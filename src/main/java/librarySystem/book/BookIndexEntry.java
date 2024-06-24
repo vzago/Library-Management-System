@@ -6,7 +6,7 @@ package librarySystem.book;
  * - isbn: International Standard Book Number
  * - filePointer: File pointer
  */
-public class IndexEntry {
+public class BookIndexEntry {
     private final  String isbn;
     private final  long filePointer;
 
@@ -15,7 +15,7 @@ public class IndexEntry {
      * @param isbn ISBN
      * @param filePointer File pointer
      */
-    public IndexEntry(String isbn, long filePointer) {
+    public BookIndexEntry(String isbn, long filePointer) {
         this.isbn = isbn;
         this.filePointer = filePointer;
     }

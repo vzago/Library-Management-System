@@ -6,7 +6,7 @@ package librarySystem.book;
  * - key: Title, author, or genre
  * - isbn: International Standard Book Number
  */
-public class KeyIndexEntry {
+public class BookKeyIndexEntry {
     private final String key;
     private final String isbn;
 
@@ -15,7 +15,7 @@ public class KeyIndexEntry {
      * @param key key
      * @param isbn ISBN
      */
-    public KeyIndexEntry(String key, String isbn) {
+    public BookKeyIndexEntry(String key, String isbn) {
         this.key = key;
         this.isbn = isbn;
     }
